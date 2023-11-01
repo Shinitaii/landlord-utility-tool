@@ -72,6 +72,8 @@ export default function InputSection() {
     }, [totalCurrentReading, previousCurrentReading, rate, totalWaterCurrentReading, totalWaterCurrentReading2, previousWaterCurrentReading, previousWaterCurrentReading2, waterRate, waterRate2]);
 
     return (
+        <>
+        
         <div className='h-screen flex justify-evenly items-center'>
             <div className="p-4 flex flex-col border rounded-lg h-96 overflow-y-scroll">
                 <p className=' text-2xl font-bold'>Input (Main Meter)</p>
@@ -121,5 +123,9 @@ export default function InputSection() {
                 ))}
             </div>
         </div>
+        <div className='p-2 fixed bottom-0'>
+            <p>Created by: <Link className='underline text-indigo-600' href='https://bit.ly/shinitaii'>Shinitaii</Link> from <Link className='underline text-indigo-600' href='https://joybreadstudios.vercel.app'>Joybread Studios</Link>.</p>
+        </div>
+        </>
     )
 }
