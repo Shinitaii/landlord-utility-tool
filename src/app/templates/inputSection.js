@@ -3,18 +3,22 @@ import Link from 'next/link';
 import {useState, useEffect} from 'react'
 export default function InputSection() {
     const [tenants, setTenants] = useState([]);
+    //bills
     const [totalBill, setTotalBill] = useState(0);
     const [totalWaterBill, setTotalWaterBill] = useState(0)
     const [totalWaterBill2, setTotalWaterBill2] = useState(0)
+    //rates
     const [rate, setRate] = useState(0)
     const [waterRate, setWaterRate] = useState(0)
     const [waterRate2, setWaterRate2] = useState(0)
+    //readings
     const [totalCurrentReading, setTotalCurrentReading] = useState(0)
     const [previousCurrentReading, setPreviousCurrentReading] = useState(0)
     const [totalWaterCurrentReading, setTotalWaterCurrentReading] = useState(0)
     const [previousWaterCurrentReading, setPreviousWaterCurrentReading] = useState(0)
     const [totalWaterCurrentReading2, setTotalWaterCurrentReading2] = useState(0)
     const [previousWaterCurrentReading2, setPreviousWaterCurrentReading2] = useState(0)
+    //total consumed
     const [kwh, setKwh] = useState(0)
     const [cubic, setCubic] = useState(0)
     const [cubic2, setCubic2] = useState(0)
@@ -46,8 +50,14 @@ export default function InputSection() {
         localStorage.setItem('main', JSON.stringify({totalBill, rate, kwh, totalCurrentReading, previousCurrentReading}))
         localStorage.setItem('water', JSON.stringify({totalWaterBill, waterRate, cubic, totalWaterCurrentReading, previousWaterCurrentReading}))
         localStorage.setItem('water2', JSON.stringify({totalWaterBill2, waterRate2, cubic2, totalWaterCurrentReading2, previousWaterCurrentReading2}))
-
     }
+
+    const InputField = (label, value, setValue, type) => (
+        <div className='p-2 flex justify-between'>
+            <label>{label}:</label>
+            <input className='mx-2 border rounded-md w-28' type={type} value={value} onChange={(e) => setValue(e.target.value)}/>
+        </div>
+    );
 
     useEffect(() => {
         const consumedValue = Math.abs(totalCurrentReading - previousCurrentReading);
@@ -62,94 +72,51 @@ export default function InputSection() {
     }, [totalCurrentReading, previousCurrentReading, rate, totalWaterCurrentReading, totalWaterCurrentReading2, previousWaterCurrentReading, previousWaterCurrentReading2, waterRate, waterRate2]);
 
     return (
-        <div className='flex justify-evenly items-center'>
-            <div className="p-4 flex flex-col border rounded-lg">
-                <p className='m-2 text-2xl font-bold'>Input</p>
-                <div className='m-2 p-2 flex'>
+        <div className='h-screen flex justify-evenly items-center'>
+            <div className="p-4 flex flex-col border rounded-lg h-96 overflow-y-scroll">
+                <p className=' text-2xl font-bold'>Input (Main Meter)</p>
+                <div className=' p-2 flex'>
                     <label>Number of Tenants: </label>
                     <input className='mx-2 border rounded-md w-28' type="number" value={tenants.length} onChange={handleNumberOfTenantsChange}/>
                 </div>
-                <p>Electricity</p>
-                <div className='m-2 p-2 flex'>
-                    <label>Electricity Rate: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={rate} onChange={(e) => setRate(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Current Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={totalCurrentReading} onChange={(e) => setTotalCurrentReading(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Previous Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={previousCurrentReading} onChange={(e) => setPreviousCurrentReading(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2'>
+                <p className='font-bold'>Electricity</p>
+                    {InputField("Electricity Rate", rate, setRate, "number")}
+                    {InputField("Total Current Reading", totalCurrentReading, setTotalCurrentReading, "number")}
+                    {InputField("Total Previous Reading", previousCurrentReading, setPreviousCurrentReading, "number")}
+                <div className='p-2'>
                     <p>Consumed: {kwh}</p>
                     <p>Total Bill: {totalBill}</p>
                 </div>
-                <p>Water</p>
-                <div className='m-2 p-2 flex'>
-                    <label>Water Rate: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={waterRate} onChange={(e) => setWaterRate(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Current Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={totalWaterCurrentReading} onChange={(e) => setTotalWaterCurrentReading(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Previous Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={previousWaterCurrentReading} onChange={(e) => setPreviousWaterCurrentReading(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2'>
+                <p className='font-bold'>Water (LL)</p>
+                    {InputField("Water Rate", waterRate, setWaterRate, "number")}
+                    {InputField("Total Current Reading", totalWaterCurrentReading, setTotalWaterCurrentReading, "number")}
+                    {InputField("Total Previous Reading", previousWaterCurrentReading, setPreviousWaterCurrentReading, "number")}
+                <div className=' p-2'>
                     <p>Consumed: {cubic}</p>
                     <p>Total Bill: {totalWaterBill}</p>
                 </div>
-                <p>Water 2</p>
-                <div className='m-2 p-2 flex'>
-                    <label>Water Rate: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={waterRate2} onChange={(e) => setWaterRate2(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Current Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={totalWaterCurrentReading2} onChange={(e) => setTotalWaterCurrentReading2(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2 flex'>
-                    <label>Total Previous Reading: </label>
-                    <input className='mx-2 border rounded-md w-28' type="number" value={previousWaterCurrentReading2} onChange={(e) => setPreviousWaterCurrentReading2(e.target.value)}/>
-                </div>
-                <div className='m-2 p-2'>
+                <p className='font-bold'>Water 2 (ML)</p>
+                    {InputField("Water Rate", waterRate2, setWaterRate2, "number")}
+                    {InputField("Total Current Reading", totalWaterCurrentReading2, setTotalWaterCurrentReading2, "number")}
+                    {InputField("Total Previous Reading", previousWaterCurrentReading2, setPreviousWaterCurrentReading2, "number")}
+                <div className=' p-2'>
                     <p>Consumed: {cubic2}</p>
                     <p>Total Bill: {totalWaterBill2}</p>
                 </div>
                 <Link className='p-2 rounded-xl border' href='/print' onClick={getValues}>Calculate</Link>
             </div>
-            <div>
+            <div className='p-8 h-96 w-1/3 border rounded-xl overflow-y-scroll'>
                 {tenants.map((tenant, tenantIndex) => (
-                    <div key={tenantIndex}>
+                    <div className='rounded border p-2 my-4' key={tenantIndex} >
                         <p>Tenant {tenantIndex + 1}</p>
-                        <div>
-                            <label>Name:</label>
-                            <input type='text' name='name' value={tenant.name} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
-                        <div>
-                            <label>Current Reading:</label>
-                            <input type='text' name='currentReading' value={tenant.currentReading} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
-                        <div>
-                            <label>Previous Reading:</label>
-                            <input type='text' name='previousReading' value={tenant.previousReading} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
-                        <div>
-                            <label>Current Water Reading:</label>
-                            <input type='text' name='currentWaterReading' value={tenant.currentWaterReading} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
-                        <div>
-                            <label>Previous Water Reading:</label>
-                            <input type='text' name='previousWaterReading' value={tenant.previousWaterReading} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
-                        <div>
-                            <label>Select water type (1 or 2):</label>
-                            <input type='text' name='waterType' value={tenant.waterType} onChange={(e) => handleInputChange(tenantIndex, e)} />
-                        </div>
+                        {
+                        [['name', 'Name'], ['currentReading', 'Current Reading'], ['previousReading', 'Previous Reading'], ['currentWaterReading', 'Current Water Reading'], ['previousWaterReading', 'Previous Water Reading'], ['waterType', 'Water Type']]
+                        .map(([field, caps], fieldIndex) => (
+                            <div className='flex items-center justify-between m-2' key={fieldIndex}>
+                                <label>{caps}:</label>
+                                <input className='p-1 border rounded-xl w-36' type="text" name={field} value={tenant[field]} onChange={(e) => handleInputChange(tenantIndex, e)} />
+                            </div>
+                        ))}
                     </div>
                 ))}
             </div>
