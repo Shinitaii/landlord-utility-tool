@@ -73,8 +73,7 @@ export default function InputSection() {
 
     return (
         <>
-        
-        <div className='h-screen flex justify-evenly items-center'>
+        <div className='h-screen flex 2xl:flex-col justify-evenly items-center'>
             <div className="p-4 flex flex-col border rounded-lg h-96 overflow-y-scroll">
                 <p className=' text-2xl font-bold'>Input (Main Meter)</p>
                 <div className=' p-2 flex'>
@@ -124,7 +123,7 @@ export default function InputSection() {
             </div>
         </div>
         <div className='p-2 fixed bottom-0'>
-            <p>Created by: <Link className='underline text-indigo-600' href='https://bit.ly/shinitaii'>Shinitaii</Link> from <Link className='underline text-indigo-600' href='https://joybreadstudios.vercel.app'>Joybread Studios</Link>.</p>
+            <p className='text-xs'>Created by: <Link className='underline text-indigo-600' href='https://bit.ly/shinitaii'>Shinitaii</Link> from <Link className='underline text-indigo-600' href='https://joybreadstudios.vercel.app'>Joybread Studios</Link>.</p>
         </div>
         </>
     )
