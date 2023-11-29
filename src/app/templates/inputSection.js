@@ -2,26 +2,31 @@
 import Link from 'next/link';
 import {useState, useEffect} from 'react'
 export default function InputSection() {
+    const [bills, setBills] = useState({
+        electric: { bill: 0 },
+        water: { bill: 0 },
+        water2: { bill: 0 }
+    });
+
+    const [rates, setRates] = useState({
+        electric: { rate: 0 },
+        water: { rate: 0 },
+        water2: { rate: 0 }
+    });
+      
+    const [readings, setReadings] = useState({
+        electric: { currentReading: 0, previousReading: 0 },
+        water: { currentReading: 0, previousReading: 0 },
+        water2: { currentReading: 0, previousReading: 0 }
+    });
+      
+    const [consumed, setConsumed] = useState({
+        electric: { kwh: 0 },
+        water: { cubic: 0 },
+        water2: { cubic: 0 }
+    });
+
     const [tenants, setTenants] = useState([]);
-    //bills
-    const [totalBill, setTotalBill] = useState(0);
-    const [totalWaterBill, setTotalWaterBill] = useState(0)
-    const [totalWaterBill2, setTotalWaterBill2] = useState(0)
-    //rates
-    const [rate, setRate] = useState(0)
-    const [waterRate, setWaterRate] = useState(0)
-    const [waterRate2, setWaterRate2] = useState(0)
-    //readings
-    const [totalCurrentReading, setTotalCurrentReading] = useState(0)
-    const [previousCurrentReading, setPreviousCurrentReading] = useState(0)
-    const [totalWaterCurrentReading, setTotalWaterCurrentReading] = useState(0)
-    const [previousWaterCurrentReading, setPreviousWaterCurrentReading] = useState(0)
-    const [totalWaterCurrentReading2, setTotalWaterCurrentReading2] = useState(0)
-    const [previousWaterCurrentReading2, setPreviousWaterCurrentReading2] = useState(0)
-    //total consumed
-    const [kwh, setKwh] = useState(0)
-    const [cubic, setCubic] = useState(0)
-    const [cubic2, setCubic2] = useState(0)
 
     const handleNumberOfTenantsChange = (e) => {
         const numberOfTenants = parseInt(e.target.value, 10);
@@ -33,7 +38,8 @@ export default function InputSection() {
               previousReading: '',
               currentWaterReading: '',
               previousWaterReading: '',
-              waterType: ''
+              waterType: '',
+              meter: '',
             })));
           }
       };
@@ -46,30 +52,73 @@ export default function InputSection() {
     };
 
     const getValues = () => {
-        localStorage.setItem('tenants', JSON.stringify(tenants));
-        localStorage.setItem('main', JSON.stringify({totalBill, rate, kwh, totalCurrentReading, previousCurrentReading}))
-        localStorage.setItem('water', JSON.stringify({totalWaterBill, waterRate, cubic, totalWaterCurrentReading, previousWaterCurrentReading}))
-        localStorage.setItem('water2', JSON.stringify({totalWaterBill2, waterRate2, cubic2, totalWaterCurrentReading2, previousWaterCurrentReading2}))
+        const data = {
+            tenants: tenants,
+            electric: {
+                bill: bills.electric.bill,
+                rate: rates.electric.rate,
+                kwh: consumed.electric.kwh,
+                currentReading: readings.electric.currentReading,
+                previousReading: readings.electric.previousReading
+            },
+            water: {
+                bill: bills.water.bill,
+                rate: rates.water.rate,
+                cubic: consumed.water.cubic,
+                currentReading: readings.water.currentReading,
+                previousReading: readings.water.previousReading
+            },
+            water2: {
+                bill: bills.water2.bill,
+                rate: rates.water2.rate,
+                cubic: consumed.water2.cubic,
+                currentReading: readings.water2.currentReading,
+                previousReading: readings.water2.previousReading
+            }
+        };
+        localStorage.setItem('data', JSON.stringify(data));
     }
 
-    const InputField = (label, value, setValue, type) => (
+    const InputField = (label, value, setValue) => (
         <div className='p-2 flex justify-between'>
             <label>{label}:</label>
-            <input className='mx-2 border rounded-md w-28' type={type} value={value} onChange={(e) => setValue(e.target.value)}/>
+            <input className='mx-2 border rounded-md w-28' type="number" value={value} onChange={(e) => setValue(e.target.value)}/>
         </div>
     );
 
+    const updateStates = () => {
+        const updatedConsumed = {
+            electric: { kwh: Math.abs(readings.electric.currentReading - readings.electric.previousReading).toFixed(2) },
+            water: { cubic: Math.abs(readings.water.currentReading - readings.water.previousReading).toFixed(2) },
+            water2: { cubic: Math.abs(readings.water2.currentReading - readings.water2.previousReading).toFixed(2) },
+        };
+    
+        const updatedBills = {
+            electric: { bills: (updatedConsumed.electric.kwh * rates.electric.rate).toFixed(2) },
+            water: { bills: (updatedConsumed.water.cubic * rates.water.rate).toFixed(2) },
+            water2: { bills: (updatedConsumed.water2.cubic * rates.water2.rate).toFixed(2) },
+        };
+    
+        setConsumed((prevConsumed) => ({ ...prevConsumed, ...updatedConsumed }));
+        setBills((prevBills) => ({ ...prevBills, ...updatedBills }));
+    };
     useEffect(() => {
-        const consumedValue = Math.abs(totalCurrentReading - previousCurrentReading);
-        setKwh(consumedValue);
-        setTotalBill(consumedValue * rate);
-        const consumedWater = Math.abs(totalWaterCurrentReading - previousWaterCurrentReading);
-        setCubic(consumedWater);
-        setTotalWaterBill(consumedWater * waterRate);
-        const consumedWater2 = Math.abs(totalWaterCurrentReading2 - previousWaterCurrentReading2);
-        setCubic2(consumedWater2);
-        setTotalWaterBill2(consumedWater2 * waterRate2);
-    }, [totalCurrentReading, previousCurrentReading, rate, totalWaterCurrentReading, totalWaterCurrentReading2, previousWaterCurrentReading, previousWaterCurrentReading2, waterRate, waterRate2]);
+        updateStates();
+    }, [readings,rates]);
+    
+
+    const renderMeterSection = (title, rate, currentReading, previousReading, consumedUnit, bill, meterType, unit) => (
+        <div className='meter-section'>
+            <p className='font-bold'>{title}</p>
+            {InputField(`${title} Rate`, rate, (value) => setRates((prevRates) => ({ ...prevRates, [meterType]: { rate: parseFloat(value) } })))}
+            {InputField("Total Current Reading", currentReading, (value) => setReadings((prevReadings) => ({ ...prevReadings, [meterType]: { ...prevReadings[meterType], currentReading: value } })))}
+            {InputField("Total Previous Reading", previousReading, (value) => setReadings((prevReadings) => ({ ...prevReadings, [meterType]: { ...prevReadings[meterType], previousReading: value } })))}
+            <div className='p-2'>
+                <p>Consumed: {consumedUnit} {unit}</p>
+                <p>Total Bill: ₱{bill}</p>
+            </div>
+        </div>
+    );
 
     return (
         <>
@@ -80,30 +129,9 @@ export default function InputSection() {
                     <label>Number of Tenants: </label>
                     <input className='mx-2 border rounded-md w-28' type="number" value={tenants.length} onChange={handleNumberOfTenantsChange}/>
                 </div>
-                <p className='font-bold'>Electricity</p>
-                    {InputField("Electricity Rate", rate, setRate, "number")}
-                    {InputField("Total Current Reading", totalCurrentReading, setTotalCurrentReading, "number")}
-                    {InputField("Total Previous Reading", previousCurrentReading, setPreviousCurrentReading, "number")}
-                <div className='p-2'>
-                    <p>Consumed: {kwh}</p>
-                    <p>Total Bill: {totalBill}</p>
-                </div>
-                <p className='font-bold'>Water (LL)</p>
-                    {InputField("Water Rate", waterRate, setWaterRate, "number")}
-                    {InputField("Total Current Reading", totalWaterCurrentReading, setTotalWaterCurrentReading, "number")}
-                    {InputField("Total Previous Reading", previousWaterCurrentReading, setPreviousWaterCurrentReading, "number")}
-                <div className=' p-2'>
-                    <p>Consumed: {cubic}</p>
-                    <p>Total Bill: {totalWaterBill}</p>
-                </div>
-                <p className='font-bold'>Water 2 (ML)</p>
-                    {InputField("Water Rate", waterRate2, setWaterRate2, "number")}
-                    {InputField("Total Current Reading", totalWaterCurrentReading2, setTotalWaterCurrentReading2, "number")}
-                    {InputField("Total Previous Reading", previousWaterCurrentReading2, setPreviousWaterCurrentReading2, "number")}
-                <div className=' p-2'>
-                    <p>Consumed: {cubic2}</p>
-                    <p>Total Bill: {totalWaterBill2}</p>
-                </div>
+                {renderMeterSection('Electricity', rates.electric.rate, readings.electric.currentReading, readings.electric.previousReading, consumed.electric.kwh, bills.electric.bills, 'electric', 'kWh')}
+                {renderMeterSection('Water (LL)', rates.water.rate, readings.water.currentReading, readings.water.previousReading, consumed.water.cubic, bills.water.bills, 'water', <>c<sup>3</sup></>)}
+                {renderMeterSection('Water 2 (ML)', rates.water2.rate, readings.water2.currentReading, readings.water2.previousReading, consumed.water2.cubic, bills.water2.bills, 'water2', <>c<sup>3</sup></>)}
                 <Link className='p-2 rounded-xl border' href='/print' onClick={getValues}>Calculate</Link>
             </div>
             <div className='p-8 h-96 w-1/3 border rounded-xl overflow-y-scroll'>
@@ -111,7 +139,7 @@ export default function InputSection() {
                     <div className='rounded border p-2 my-4' key={tenantIndex} >
                         <p>Tenant {tenantIndex + 1}</p>
                         {
-                        [['name', 'Name'], ['currentReading', 'Current Reading'], ['previousReading', 'Previous Reading'], ['currentWaterReading', 'Current Water Reading'], ['previousWaterReading', 'Previous Water Reading'], ['waterType', 'Water Type']]
+                        [['name', 'Name'], ['currentReading', 'Current Reading'], ['previousReading', 'Previous Reading'], ['currentWaterReading', 'Current Water Reading'], ['previousWaterReading', 'Previous Water Reading'], ['waterType', 'Water Type'], ['meter', 'Main Meter?']]
                         .map(([field, caps], fieldIndex) => (
                             <div className='flex items-center justify-between m-2' key={fieldIndex}>
                                 <label>{caps}:</label>
@@ -121,9 +149,6 @@ export default function InputSection() {
                     </div>
                 ))}
             </div>
-        </div>
-        <div className='p-2 fixed bottom-0'>
-            <p className='text-xs'>Created by: <Link className='underline text-indigo-600' href='https://bit.ly/shinitaii'>Shinitaii</Link> from <Link className='underline text-indigo-600' href='https://joybreadstudios.vercel.app'>Joybread Studios</Link>.</p>
         </div>
         </>
     )
